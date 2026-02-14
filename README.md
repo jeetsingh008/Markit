@@ -53,8 +53,9 @@ During the development and deployment of this application, several key challenge
 -   Updated the `matcher` config to properly ignore static files (`_next/static`, `favicon.ico`, etc.) to prevent infinite loops.
 
 ### 3. Styling & Theme Conflicts (Invisible Text)
-**Challenge:** The application defaulted to the user's system preference for Dark Mode, but the UI was not fully optimized for it, leading to "white text on white background" issues in the login and dashboard pages.
+**Challenge:** The application defaulted to the user's system preference for Dark Mode, but the UI was not fully optimized for it, leading to "white text on white background" issues in the login and dashboard pages. Also misspelled and added wrong prefix(:) to the theme pseudo-class in the globals.css file, causing tailwindCSS parse error.
 **Solution:**
+-   Replaced the theme prefix to @ - @theme{... solving the error.
 -   Modified `src/app/globals.css` to remove the `@media (prefers-color-scheme: dark)` block.
 -   Forced the CSS variables (`--background`, `--foreground`) to use the light theme values by default.
 -   Ensured all text elements have sufficient contrast against their backgrounds explicitly in Tailwind classes (e.g., `text-gray-900`, `bg-white`).

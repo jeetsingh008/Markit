@@ -58,3 +58,9 @@ During the development and deployment of this application, several key challenge
 -   Modified `src/app/globals.css` to remove the `@media (prefers-color-scheme: dark)` block.
 -   Forced the CSS variables (`--background`, `--foreground`) to use the light theme values by default.
 -   Ensured all text elements have sufficient contrast against their backgrounds explicitly in Tailwind classes (e.g., `text-gray-900`, `bg-white`).
+
+### 4. Production Deployment Challenges
+**Challenge:** Encountered a `redirect_uri_mismatch` error after deploying to Vercel. Even with successful local authentication, the production environment failed to complete the Google OAuth "handshake."
+**Solution:**
+-   **Google Cloud Console:** Updated the credentials to include the Vercel production domain in both "Authorized JavaScript origins" and "Authorized redirect URIs" (pointing to the Supabase auth callback).
+-   **Supabase Settings:** Reconfigured Supabase Auth Settings by updating the "Site URL" to the production domain and adding wildcard redirect paths (`/**`) to support deep-linking and preview deployments.

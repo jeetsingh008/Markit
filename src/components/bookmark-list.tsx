@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 
 type Bookmark = {
     id: number
-    created_at: string // usually added by supabase
+    created_at: string
     title: string
     url: string
     user_id: string
@@ -17,20 +17,18 @@ export default function BookmarkList({ initialBookmarks }: { initialBookmarks: B
     const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks)
 
     useEffect(() => {
-        // Update local state if initialBookmarks changes (e.g. server revalidation)
         setBookmarks(initialBookmarks)
     }, [initialBookmarks])
 
     useEffect(() => {
         const supabase = createClient()
 
-        // Subscribe to realtime changes
         const channel = supabase
             .channel('realtime-bookmarks')
             .on(
                 'postgres_changes',
                 {
-                    event: '*', // Listen to all events (INSERT, DELETE mainly)
+                    event: '*',
                     schema: 'public',
                     table: 'bookmarks',
                 },
@@ -50,24 +48,9 @@ export default function BookmarkList({ initialBookmarks }: { initialBookmarks: B
         return () => {
             supabase.removeChannel(channel)
         }
-    }, []) // Empty dependency array to run once on mount
+    }, [])
 
     const handleDelete = async (id: number) => {
-        // Optimistic update locally? 
-        // Realtime will handle it, but for better UX we might want to do it immediately.
-        // But let's rely on realtime as requested: "Real-time Hook: A client component listener that updates the local state on INSERT or DELETE events."
-        // So we invoke the server action and let the realtime subscription update the UI?
-        // Or let revalidatePath update the UI via prop update?
-        // If we use revalidatePath, the `initialBookmarks` prop will update.
-        // If we use realtime, we get the event.
-        // We should handle both without duplication.
-        // If `initialBookmarks` updates, we `setBookmarks`.
-        // If realtime event comes, we `setBookmarks`.
-        // Duplicates might happen if both fire.
-        // But `setBookmarks` with filter is safe for delete.
-        // For Insert, we might get duplicates if we just append.
-        // Ideally we should use a consistent ID check.
-
         try {
             await deleteBookmark(id)
         } catch (error) {

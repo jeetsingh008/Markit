@@ -11,11 +11,6 @@ export default function AddBookmarkForm() {
         setIsLoading(true)
         try {
             await addBookmark(formData)
-            // Reset form handled by browser if we don't preventDefault, 
-            // but with server action in 'action' prop, the form resets if we don't mess with it?
-            // Actually standard form action doesn't automatically reset inputs in all cases in Next.js.
-            // Better to use ref to reset or simple logic.
-            // But for now, simple implementation.
             const form = document.querySelector('form') as HTMLFormElement
             if (form) form.reset()
         } catch (error) {

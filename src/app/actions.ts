@@ -27,7 +27,6 @@ export async function addBookmark(formData: FormData) {
         throw new Error('Title and URL are required')
     }
 
-    // Basic URL validation
     let validUrl = url
     if (!/^https?:\/\//i.test(url)) {
         validUrl = 'https://' + url

@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart Bookmark App
 
-## Getting Started
+A real-time bookmark manager built with Next.js 16, Supabase, and Tailwind CSS.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Google OAuth**: Secure sign-in without passwords.
+- **Private Bookmarks**: Row Level Security (RLS) ensures data privacy.
+- **Real-time Sync**: Updates across tabs instantly using Supabase Realtime.
+- **Server Actions**: Efficient data mutations.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  **Clone the repository**.
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+3.  **Configure Environment Variables**:
+    Create a `.env.local` file in the root directory:
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+    ```
+4.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
+5.  **Open [http://localhost:3000](http://localhost:3000)**.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Architecture
 
-## Learn More
+- **Auth**: Handled via Supabase SSR helpers and Middleware.
+- **Database**: Supabase PostgreSQL with RLS policies.
+- **Realtime**: `supabse-js` client subscription in `BookmarkList` component.
 
-To learn more about Next.js, take a look at the following resources:
+## Challenges & Solutions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+During the development and deployment of this application, several key challenges were encountered. Here's how i resolved them:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 1. Google Cloud Console & Supabase Connection
+**Challenge:** Connecting Google OAuth with Supabase often results in `redirect_uri_mismatch` errors or failures to exchange the authorization code for a session.
+**Solution:**
+-   **Google Cloud Console:** Ensure the "Authorized redirect URIs" list includes `https://[PROJECT_REF].supabase.co/auth/v1/callback` exactly.
+-   **Supabase Dashboard:** In Authentication -> Providers -> Google, verify that the **Client ID** and **Client Secret** match exactly what was generated in Google Cloud.
+-   **Local Development:** Add `http://localhost:3000/auth/callback` to the redirect URIs if testing locally without the Supabase proxy.
 
-## Deploy on Vercel
+### 2. Middleware vs. Proxy Conflict
+**Challenge:** Next.js throws an error `Both middleware file "./src/middleware.ts" and proxy file "./src/proxy.ts" are detected` when trying to organize middleware logic. This happens because some guides recommend `proxy.ts` (deprecated convention) while others use `middleware.ts`.
+**Solution:**
+-   Deleted the redundant `src/middleware.ts` file.
+-   Consolidated all logic into `src/proxy.ts` (or vice-versa, ensuring only *one* entry point exists).
+-   Updated the `matcher` config to properly ignore static files (`_next/static`, `favicon.ico`, etc.) to prevent infinite loops.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. Styling & Theme Conflicts (Invisible Text)
+**Challenge:** The application defaulted to the user's system preference for Dark Mode, but the UI was not fully optimized for it, leading to "white text on white background" issues in the login and dashboard pages.
+**Solution:**
+-   Modified `src/app/globals.css` to remove the `@media (prefers-color-scheme: dark)` block.
+-   Forced the CSS variables (`--background`, `--foreground`) to use the light theme values by default.
+-   Ensured all text elements have sufficient contrast against their backgrounds explicitly in Tailwind classes (e.g., `text-gray-900`, `bg-white`).

@@ -13,7 +13,13 @@ type Bookmark = {
     user_id: string
 }
 
-export default function BookmarkList({ initialBookmarks }: { initialBookmarks: Bookmark[] }) {
+export default function BookmarkList({
+    initialBookmarks,
+    accessToken
+}: {
+    initialBookmarks: Bookmark[]
+    accessToken?: string
+}) {
     const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks)
 
     useEffect(() => {
@@ -22,6 +28,10 @@ export default function BookmarkList({ initialBookmarks }: { initialBookmarks: B
 
     useEffect(() => {
         const supabase = createClient()
+
+        if (accessToken) {
+            supabase.realtime.setAuth(accessToken)
+        }
 
         const channel = supabase
             .channel('realtime-bookmarks')
@@ -53,7 +63,7 @@ export default function BookmarkList({ initialBookmarks }: { initialBookmarks: B
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [])
+    }, [accessToken])
 
     const handleDelete = async (id: string) => {
         try {

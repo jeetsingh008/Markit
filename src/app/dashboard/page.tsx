@@ -20,6 +20,10 @@ export default async function DashboardPage() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
+    const {
+        data: { session },
+    } = await supabase.auth.getSession()
+
     return (
         <div>
             <div className="mb-8">
@@ -31,7 +35,10 @@ export default async function DashboardPage() {
 
             <div className="mt-8">
                 <h2 className="text-xl font-semibold mb-4">Your List</h2>
-                <BookmarkList initialBookmarks={bookmarks || []} />
+                <BookmarkList
+                    initialBookmarks={bookmarks || []}
+                    accessToken={session?.access_token}
+                />
             </div>
         </div>
     )

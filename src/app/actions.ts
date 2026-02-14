@@ -45,7 +45,7 @@ export async function addBookmark(formData: FormData) {
     revalidatePath('/dashboard')
 }
 
-export async function deleteBookmark(id: number) {
+export async function deleteBookmark(id: string) {
     const supabase = await createClient()
     const {
         data: { user },

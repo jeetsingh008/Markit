@@ -6,7 +6,7 @@ import { Trash2, ExternalLink, Globe } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 type Bookmark = {
-    id: number
+    id: string
     created_at: string
     title: string
     url: string
@@ -33,9 +33,14 @@ export default function BookmarkList({ initialBookmarks }: { initialBookmarks: B
                     table: 'bookmarks',
                 },
                 (payload) => {
-                    console.log('Realtime change:', payload)
+                    console.log('Realtime change received:', payload)
+
                     if (payload.eventType === 'INSERT') {
-                        setBookmarks((current) => [...current, payload.new as Bookmark])
+                        const newBookmark = payload.new as Bookmark
+                        setBookmarks((current) => {
+                            if (current.find(b => b.id === newBookmark.id)) return current
+                            return [newBookmark, ...current]
+                        })
                     } else if (payload.eventType === 'DELETE') {
                         setBookmarks((current) =>
                             current.filter((bookmark) => bookmark.id !== payload.old.id)
@@ -50,7 +55,7 @@ export default function BookmarkList({ initialBookmarks }: { initialBookmarks: B
         }
     }, [])
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         try {
             await deleteBookmark(id)
         } catch (error) {

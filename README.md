@@ -65,3 +65,16 @@ During the development and deployment of this application, several key challenge
 **Solution:**
 -   **Google Cloud Console:** Updated the credentials to include the Vercel production domain in both "Authorized JavaScript origins" and "Authorized redirect URIs" (pointing to the Supabase auth callback).
 -   **Supabase Settings:** Reconfigured Supabase Auth Settings by updating the "Site URL" to the production domain and adding wildcard redirect paths (`/**`) to support deep-linking and preview deployments.
+
+### 5. Realtime Synchronization & Security Policies
+**Challenge:** Real-time UI synchronization was failing across different browser tabs/sessions despite correct database replication and SQL configurations.
+
+**Root Cause:**
+-   **Security Handshake:** Because the app uses secure HttpOnly cookies, the client-side Supabase instance was connecting to the Realtime WebSocket anonymously.
+-   **RLS Blocking:** The Row Level Security (RLS) policy `auth.uid() = user_id` correctly blocked these anonymous connections from receiving data.
+-   **Type Mismatch:** A secondary issue existed where the `id` was treated as a number in TypeScript while the Postgres schema used UUID (string), breaking the `.filter()` logic for deletions.
+
+**Solution:**
+-   **Authenticated WebSockets:** Modified `dashboard/page.tsx` to retrieve the `access_token` from the server-side session and pass it to the `BookmarkList` component.
+-   **Explicit Auth:** Implemented `supabase.realtime.setAuth(accessToken)` within the client-side `useEffect` to manually authenticate the WebSocket channel.
+-   **Schema Alignment:** Updated the `Bookmark` type and state logic to use `string` for IDs, ensuring perfect compatibility with Postgres UUIDs.

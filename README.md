@@ -1,4 +1,4 @@
-# Smart Bookmark App
+# Markit - Smart Bookmark App
 
 A real-time bookmark manager built with Next.js 16, Supabase, and Tailwind CSS.
 
